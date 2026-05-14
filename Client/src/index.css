@@ -3,10 +3,175 @@
 html,
 body {
     background-color: #000000;
-    /* overscroll-behavior: none; */
 }
-
 
 ::-webkit-scrollbar {
   width: 0%;
+}
+
+/* ── Clerk dark theme global overrides ──────────────────────
+   Clerk injects deeply nested elements that ignore the
+   appearance prop. These rules force everything dark.
+   Scoped to .clerk-dark-wrapper to avoid leaking. */
+
+.clerk-dark-wrapper .cl-internal-b3fm6y,
+.clerk-dark-wrapper .cl-internal-1dauvt,
+.clerk-dark-wrapper .cl-internal-2w7kmg,
+.clerk-dark-wrapper [class*="cl-internal"] {
+    background-color: transparent !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Card & root containers */
+.clerk-dark-wrapper .cl-card,
+.clerk-dark-wrapper .cl-rootBox,
+.clerk-dark-wrapper .cl-cardBox,
+.clerk-dark-wrapper .cl-signIn-root,
+.clerk-dark-wrapper .cl-signUp-root {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Header text */
+.clerk-dark-wrapper .cl-headerTitle {
+    color: #ffffff !important;
+}
+.clerk-dark-wrapper .cl-headerSubtitle {
+    color: #71717a !important;
+}
+
+/* Input fields */
+.clerk-dark-wrapper .cl-formFieldInput,
+.clerk-dark-wrapper input[type="text"],
+.clerk-dark-wrapper input[type="email"],
+.clerk-dark-wrapper input[type="password"] {
+    background-color: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+    border-radius: 0.75rem !important;
+}
+.clerk-dark-wrapper .cl-formFieldInput:focus,
+.clerk-dark-wrapper input:focus {
+    border-color: #71717a !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Labels */
+.clerk-dark-wrapper .cl-formFieldLabel {
+    color: #a1a1aa !important;
+}
+
+/* Primary button */
+.clerk-dark-wrapper .cl-formButtonPrimary {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: 0.75rem !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
+}
+.clerk-dark-wrapper .cl-formButtonPrimary:hover {
+    background-color: #e4e4e7 !important;
+}
+
+/* Social/OAuth buttons */
+.clerk-dark-wrapper .cl-socialButtonsBlockButton,
+.clerk-dark-wrapper .cl-socialButtonsIconButton {
+    background-color: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #d4d4d8 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: none !important;
+}
+.clerk-dark-wrapper .cl-socialButtonsBlockButton:hover,
+.clerk-dark-wrapper .cl-socialButtonsIconButton:hover {
+    background-color: #27272a !important;
+    border-color: #52525b !important;
+}
+.clerk-dark-wrapper .cl-socialButtonsBlockButtonText {
+    color: #d4d4d8 !important;
+}
+
+/* Dividers */
+.clerk-dark-wrapper .cl-dividerLine {
+    background-color: #27272a !important;
+}
+.clerk-dark-wrapper .cl-dividerText {
+    color: #52525b !important;
+}
+
+/* Footer links */
+.clerk-dark-wrapper .cl-footerActionLink {
+    color: #a1a1aa !important;
+}
+.clerk-dark-wrapper .cl-footerActionLink:hover {
+    color: #ffffff !important;
+}
+.clerk-dark-wrapper .cl-footerActionText {
+    color: #52525b !important;
+}
+.clerk-dark-wrapper .cl-footer {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Development mode banner — make it subtle */
+.clerk-dark-wrapper .cl-internal-b3fm6y,
+.clerk-dark-wrapper [class*="__dev"],
+.clerk-dark-wrapper .cl-badge {
+    background-color: #18181b !important;
+    background: #18181b !important;
+    color: #71717a !important;
+    border-color: #27272a !important;
+}
+
+/* Alternative methods */
+.clerk-dark-wrapper .cl-alternativeMethodsBlockButton {
+    background-color: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #d4d4d8 !important;
+    border-radius: 0.75rem !important;
+}
+
+/* OTP inputs */
+.clerk-dark-wrapper .cl-otpCodeFieldInput {
+    background-color: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
+}
+
+/* All text catch-all */
+.clerk-dark-wrapper p,
+.clerk-dark-wrapper span,
+.clerk-dark-wrapper label {
+    color: inherit;
+}
+
+/* Identity preview */
+.clerk-dark-wrapper .cl-identityPreviewText {
+    color: #ffffff !important;
+}
+.clerk-dark-wrapper .cl-identityPreviewEditButton {
+    color: #a1a1aa !important;
+}
+
+/* Alert/error messages */
+.clerk-dark-wrapper .cl-alert {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+.clerk-dark-wrapper .cl-alertText {
+    color: #f87171 !important;
+}
+
+/* Powered by Clerk link */
+.clerk-dark-wrapper .cl-internal-1dauvt,
+.clerk-dark-wrapper a[href*="clerk.com"] {
+    color: #3f3f46 !important;
+    opacity: 0.5;
 }
