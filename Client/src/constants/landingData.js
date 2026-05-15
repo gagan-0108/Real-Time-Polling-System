@@ -9,7 +9,7 @@ export const NAV_LINKS = [
 
 export const STATS = [
     { value: "10k+", label: "Polls Created" },
-    { value: "<2ms", label: "Live Latency" },
+    { value: "<150ms", label: "Live Latency" },
     { value: "100%", label: "Free to Start" },
 ];
 
