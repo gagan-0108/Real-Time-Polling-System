@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────
-//  pricing.js — single source of truth for all plan data
+// pricing.js — single source of truth for all plan data
 //  Import PRICING_TIERS wherever pricing info is needed.
-// ─────────────────────────────────────────────────────────
 
 export const PRICING_TIERS = [
     {

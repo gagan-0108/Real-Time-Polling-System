@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────
 //  landingData.js  –  single source of truth
 //  All hardcoded content for the landing page
-// ─────────────────────────────────────────────
 
 export const NAV_LINKS = [
     { label: "Pricing", to: "/pricing" },

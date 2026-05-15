@@ -1,24 +1,24 @@
-// ─────────────────────────────────────────────────────────
-//  siteContent.js — all placeholder content for static pages
-//  About, Contact, Footer, Dashboard sidebar, Auth copy
-// ─────────────────────────────────────────────────────────
 
-// ── ABOUT PAGE ───────────────────────────────────────────
+//  siteContent.js — all placeholder content for static page
+//  About, Contact, Footer, Dashboard sidebar, Auth copy
+
+// about page
 export const ABOUT_HERO = {
     headline: "Built for real feedback.",
-    subline: "IonPoll started as a weekend hack. Now it powers thousands of real-time polls for teams, creators, and communities worldwide.",
+    subline: "IonPoll started as a weekend hack. Now it powers real-time polls for teams, creators, and communities.",
 };
 
 export const ABOUT_MISSION = {
     title: "Our Mission",
-    body: "We believe decisions are better when everyone has a voice. IonPoll makes it effortless to ask questions, collect responses in real time, and act on the results — whether you're running a team retro, gathering product feedback, or polling your audience live.",
+    body: "To make it easy for people to ask, vote, and share opinions in real-time. No friction, no signups chaos, just instant feedback that actually feels alive.",
 };
 
+// about values
 export const ABOUT_VALUES = [
     {
         icon: "⚡",
         title: "Speed First",
-        desc: "Sub-2ms latency on every response. Your audience sees updates the instant they happen.",
+        desc: "Instantaneous response delivery ensures your audience sees updates the moment they happen.",
     },
     {
         icon: "🔒",
@@ -37,6 +37,7 @@ export const ABOUT_VALUES = [
     },
 ];
 
+// placeholder roadmap
 export const ABOUT_ROADMAP = [
     { quarter: "Q3 2025", label: "Beta Launch", status: "done" },
     { quarter: "Q4 2025", label: "Analytics Dashboard v2", status: "done" },
@@ -45,16 +46,15 @@ export const ABOUT_ROADMAP = [
     { quarter: "Q3 2026", label: "White-label Embeds", status: "upcoming" },
 ];
 
+// team 
 export const ABOUT_TEAM = [
-    { name: "Gagan", role: "Founder & Full-Stack Dev", avatar: null },
-    { name: "Open Position", role: "Backend Engineer", avatar: null },
-    { name: "Open Position", role: "Designer", avatar: null },
+    { name: "Gagan", role: "Full Stack Developer", avatar: null },
 ];
 
-// ── CONTACT PAGE ─────────────────────────────────────────
+// for the contact page
 export const CONTACT_FORM_FIELDS = [
-    { id: "name", label: "Your Name", type: "text", placeholder: "Jane Doe", required: true },
-    { id: "email", label: "Email", type: "email", placeholder: "jane@example.com", required: true },
+    { id: "name", label: "Your Name", type: "text", placeholder: "Gagan", required: true, disabled: true },
+    { id: "email", label: "Email", type: "email", placeholder: "[EMAIL_ADDRESS]", required: true, disabled: true },
     { id: "subject", label: "Subject", type: "text", placeholder: "Bug report, feature request, general…", required: true },
     { id: "message", label: "Message", type: "textarea", placeholder: "Tell us what's on your mind…", required: true },
 ];
@@ -83,12 +83,11 @@ export const CONTACT_FAQ = [
 ];
 
 export const CONTACT_SOCIALS = [
-    { label: "Email", value: "support@ionpoll.app", href: "mailto:support@ionpoll.app" },
-    { label: "GitHub", value: "github.com/ionpoll", href: "https://github.com/ionpoll" },
-    { label: "Twitter / X", value: "@ionpoll", href: "https://x.com/ionpoll" },
+    { label: "Email", value: "yadavgagan61@gmail.com", href: "mailto:yadavgagan61@gmail.com" },
+    { label: "GitHub", value: "@gagan-0108", href: "https://github.com/gagan-0108" },
+    { label: "Twitter / X", value: "@_sky_dev_", href: "https://x.com/_sky_dev_" },
 ];
 
-// ── FOOTER ───────────────────────────────────────────────
 export const FOOTER_LINKS = {
     product: [
         { label: "Features", to: "/#features" },
@@ -106,7 +105,6 @@ export const FOOTER_LINKS = {
     ],
 };
 
-// ── DASHBOARD SIDEBAR ────────────────────────────────────
 export const DASHBOARD_NAV = [
     { label: "Overview", to: "/dashboard", icon: "LayoutDashboard" },
     { label: "My Polls", to: "/dashboard/polls", icon: "BarChart3" },
@@ -115,7 +113,7 @@ export const DASHBOARD_NAV = [
     { label: "Create Poll", to: "/dashboard/create", icon: "PlusCircle" },
 ];
 
-// ── AUTH COPY ────────────────────────────────────────────
+// auth features
 export const AUTH_LEFT_FEATURES = [
     "⚡  Live response counts via Socket.io",
     "🔒  Anonymous & authenticated modes",

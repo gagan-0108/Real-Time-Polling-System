@@ -1,9 +1,9 @@
-// ─────────────────────────────────────────────────────────
+
 //  dashboardMock.js — mock data for dashboard UI
 //  Replace with real API calls once backend is ready
-// ─────────────────────────────────────────────────────────
 
-// ── OVERVIEW STATS ───────────────────────────────────────
+
+// overview stats
 export const OVERVIEW_STATS = [
     { label: "Total Polls", value: "24", change: "+3 this week", trend: "up" },
     { label: "Active Polls", value: "6", change: "2 expiring today", trend: "neutral" },
@@ -11,7 +11,7 @@ export const OVERVIEW_STATS = [
     { label: "Avg. Completion", value: "87%", change: "+2% vs last week", trend: "up" },
 ];
 
-// ── RESPONSE TREND (last 7 days) ─────────────────────────
+// response trend 
 export const RESPONSE_TREND = [
     { day: "Mon", responses: 42 },
     { day: "Tue", responses: 78 },
@@ -22,7 +22,7 @@ export const RESPONSE_TREND = [
     { day: "Sun", responses: 31 },
 ];
 
-// ── RECENT ACTIVITY ──────────────────────────────────────
+// recent activity
 export const RECENT_ACTIVITY = [
     { id: 1, type: "response", text: 'New response on "JS Framework Poll"', time: "2 min ago" },
     { id: 2, type: "create", text: 'You created "Sprint Retro Q2"', time: "1 hour ago" },
@@ -31,7 +31,7 @@ export const RECENT_ACTIVITY = [
     { id: 5, type: "response", text: '12 new responses on "Product Roadmap Vote"', time: "Yesterday" },
 ];
 
-// ── POLL LIST ────────────────────────────────────────────
+// poll list
 export const MOCK_POLLS = [
     {
         id: "poll-1",
@@ -90,7 +90,7 @@ export const MOCK_POLLS = [
     },
 ];
 
-// ── ANALYTICS MOCK ───────────────────────────────────────
+// analytics mock
 export const ANALYTICS_OVERVIEW = {
     totalResponses: 1847,
     avgResponseTime: "1m 42s",
@@ -150,7 +150,7 @@ export const QUESTION_ANALYTICS = {
     ],
 };
 
-// ── HISTORICAL TREND (monthly) ───────────────────────────
+// monthly historical trend
 export const MONTHLY_TREND = [
     { month: "Jan", polls: 4, responses: 180 },
     { month: "Feb", polls: 6, responses: 310 },
@@ -159,7 +159,7 @@ export const MONTHLY_TREND = [
     { month: "May", polls: 6, responses: 817 },
 ];
 
-// ── PLAN USAGE ───────────────────────────────────────────
+// plan usage
 export const PLAN_USAGE = {
     plan: "free",
     authPollsUsed: 3,
@@ -167,7 +167,7 @@ export const PLAN_USAGE = {
     responsesStored: 67,
 };
 
-// ── PUBLIC POLL (for PollView page) ──────────────────────
+// public poll 
 export const MOCK_PUBLIC_POLL = {
     id: "poll-1",
     title: "Best JS Framework 2025",
