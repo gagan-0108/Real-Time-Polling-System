@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import { ClerkProvider } from "@clerk/react";
+import { ui } from "@clerk/ui";
 import { ToastProvider } from "./hooks/useToast";
 import ToastContainer from "./components/ui/Toast";
 import { router } from "./router";
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <ClerkProvider
             publishableKey={PUBLISHABLE_KEY}
+            ui={ui}
             routerPush={(to) => router.navigate({ to })}
             routerReplace={(to) => router.navigate({ to, replace: true })}
             afterSignOutUrl="/"
