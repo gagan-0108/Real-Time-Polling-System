@@ -18,7 +18,7 @@ export const PRICING_TIERS = [
             questionsPerPoll: 5,
             optionsPerQuestion: 4,
             analyticsRetention: "7 days",
-            responseHistory: 100,
+            responseHistory: 1000,
             maxRespondentsPerPoll: 50,
             customBranding: false,
             exportResults: false,
