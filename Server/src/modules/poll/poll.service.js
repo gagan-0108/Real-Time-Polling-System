@@ -46,10 +46,7 @@ export class PollService {
 			list.push(opt);
 			optionsByQuestion.set(opt.questionId, list);
 		}
-		for (const list of optionsByQuestion.values()) {
-			list.sort((a, b) => a.sortOrder - b.sortOrder);
-		}
-
+	
 		return { questionRows, optionsByQuestion };
 	}
 
@@ -97,45 +94,50 @@ export class PollService {
 	// ── CRUD ───────────────────────────────────────────────
 
 	async list(userId) {
+		// Batch-expire all overdue polls in one query
+		await this.db
+			.update(polls)
+			.set({ status: "expired" })
+			.where(
+				and(
+					eq(polls.userId, userId),
+					sql`${polls.status} NOT IN ('expired', 'published')`,
+					sql`${polls.expiresAt} IS NOT NULL AND ${polls.expiresAt} <= now()`
+				)
+			);
+
 		const pollRows = await this.db
 			.select()
 			.from(polls)
 			.where(eq(polls.userId, userId))
 			.orderBy(desc(polls.createdAt));
 
-		const normalizedPolls = [];
-		for (const poll of pollRows) {
-			normalizedPolls.push(await this.applyExpiry(poll));
-		}
+		const pollIds = pollRows.map((p) => p.id);
+		if (pollIds.length === 0) return [];
 
-		const pollIds = normalizedPolls.map((p) => p.id);
-
-		const questionCounts = pollIds.length
-			? await this.db
-					.select({
-						pollId: questions.pollId,
-						count: sql`count(*)`.mapWith(Number),
-					})
-					.from(questions)
-					.where(inArray(questions.pollId, pollIds))
-					.groupBy(questions.pollId)
-			: [];
-
-		const responseCounts = pollIds.length
-			? await this.db
-					.select({
-						pollId: responses.pollId,
-						count: sql`count(*)`.mapWith(Number),
-					})
-					.from(responses)
-					.where(inArray(responses.pollId, pollIds))
-					.groupBy(responses.pollId)
-			: [];
+		const [questionCounts, responseCounts] = await Promise.all([
+			this.db
+				.select({
+					pollId: questions.pollId,
+					count: sql`count(*)`.mapWith(Number),
+				})
+				.from(questions)
+				.where(inArray(questions.pollId, pollIds))
+				.groupBy(questions.pollId),
+			this.db
+				.select({
+					pollId: responses.pollId,
+					count: sql`count(*)`.mapWith(Number),
+				})
+				.from(responses)
+				.where(inArray(responses.pollId, pollIds))
+				.groupBy(responses.pollId),
+		]);
 
 		const qMap = new Map(questionCounts.map((r) => [r.pollId, r.count]));
 		const rMap = new Map(responseCounts.map((r) => [r.pollId, r.count]));
 
-		return normalizedPolls.map((p) => ({
+		return pollRows.map((p) => ({
 			id: p.id,
 			title: p.title,
 			description: p.description,
@@ -159,12 +161,7 @@ export class PollService {
 	}
 
 	async getPublic(pollId) {
-		const poll = await this._getById(pollId);
-		if (!poll) return null;
-
-		const normalized = await this.applyExpiry(poll);
-		const { questionRows, optionsByQuestion } = await this._getQuestionsWithOptions(pollId);
-		return this._formatPollWithQuestions(normalized, questionRows, optionsByQuestion);
+		return this.getById(pollId);
 	}
 
 	async create(userId, data) {
