@@ -1,5 +1,4 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
-import { questions, options } from "../poll/poll.schema.js";
 import { responses, answers } from "./response.schema.js";
 import { AppError } from "../../common/utils/app-error.js";
 
@@ -65,34 +64,13 @@ export class ResponseService {
 		}
 
 		// ── load questions + options ──
-		const questionRows = await this.db
-			.select()
-			.from(questions)
-			.where(eq(questions.pollId, pollId))
-			.orderBy(questions.sortOrder);
+		const { questionRows, optionsByQuestion } = await this.pollService._getQuestionsWithOptions(pollId);
 		if (questionRows.length === 0) {
 			throw new AppError("Poll has no questions", 400);
 		}
 
-		const questionIds = questionRows.map((q) => q.id);
-		const optionRows = await this.db
-			.select()
-			.from(options)
-			.where(inArray(options.questionId, questionIds))
-			.orderBy(options.sortOrder);
-
-		const optionsByQuestion = new Map();
-		for (const opt of optionRows) {
-			const list = optionsByQuestion.get(opt.questionId) || [];
-			list.push(opt);
-			optionsByQuestion.set(opt.questionId, list);
-		}
-		for (const list of optionsByQuestion.values()) {
-			list.sort((a, b) => a.sortOrder - b.sortOrder);
-		}
-
 		// ── validate answers ──
-		const questionIdSet = new Set(questionIds);
+		const questionIdSet = new Set(questionRows.map((q) => q.id));
 		for (const qId of Object.keys(answersPayload)) {
 			if (!questionIdSet.has(qId)) {
 				throw new AppError("Answer contains invalid question", 400);
@@ -146,12 +124,8 @@ export class ResponseService {
 			return response;
 		});
 
-		// ── emit socket events ──
-		const totalRows = await this.db
-			.select({ count: sql`count(*)`.mapWith(Number) })
-			.from(responses)
-			.where(eq(responses.pollId, pollId));
-		const totalResponses = totalRows[0]?.count || 0;
+		// ── emit socket events (derive count from pre-check) ──
+		const totalResponses = (countRows[0]?.count || 0) + 1;
 		const completionRate = normalized.maxResponses > 0
 			? Math.max(0, Math.min(100, Math.round((totalResponses / normalized.maxResponses) * 100)))
 			: 0;
@@ -173,30 +147,7 @@ export class ResponseService {
 	 */
 	async listByPoll(pollId) {
 		// ── load questions + options for index mapping ──
-		const questionRows = await this.db
-			.select()
-			.from(questions)
-			.where(eq(questions.pollId, pollId))
-			.orderBy(questions.sortOrder);
-		const questionIds = questionRows.map((q) => q.id);
-
-		const optionRows = questionIds.length
-			? await this.db
-					.select()
-					.from(options)
-					.where(inArray(options.questionId, questionIds))
-					.orderBy(options.sortOrder)
-			: [];
-
-		const optionsByQuestion = new Map();
-		for (const opt of optionRows) {
-			const list = optionsByQuestion.get(opt.questionId) || [];
-			list.push(opt);
-			optionsByQuestion.set(opt.questionId, list);
-		}
-		for (const list of optionsByQuestion.values()) {
-			list.sort((a, b) => a.sortOrder - b.sortOrder);
-		}
+		const { questionRows, optionsByQuestion } = await this.pollService._getQuestionsWithOptions(pollId);
 
 		const optionIndexById = new Map();
 		for (const [questionId, optList] of optionsByQuestion.entries()) {
