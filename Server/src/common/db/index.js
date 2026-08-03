@@ -5,6 +5,8 @@ import * as schema from "./schema.js";
 
 const pool = new Pool({
 	connectionString: config.databaseUrl,
+	max: 20,
+	idleTimeoutMillis: 30_000,
 });
 
 const db = drizzle(pool, { schema });
