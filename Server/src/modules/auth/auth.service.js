@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { users } from "./auth.schema.js";
 
 /**
@@ -50,16 +49,11 @@ export class AuthService {
 	 * Creates one if missing (upsert-like idempotent operation).
 	 */
 	async ensureUserRecord(userId, claims) {
-		const existing = await this.db
-			.select({ id: users.id })
-			.from(users)
-			.where(eq(users.id, userId))
-			.limit(1);
-
-		if (existing.length > 0) return;
-
 		const email = this.getEmailFromClaims(claims, userId);
 		const name = this.getNameFromClaims(claims);
-		await this.db.insert(users).values({ id: userId, email, name });
+		await this.db
+			.insert(users)
+			.values({ id: userId, email, name })
+			.onConflictDoNothing({ target: users.id });
 	}
 }
