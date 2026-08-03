@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { polls, questions, options } from "../poll/poll.schema.js";
 import { responses, answers } from "../response/response.schema.js";
 
@@ -27,28 +27,37 @@ export class AnalyticsService {
 	 * Overall analytics for all polls owned by a user.
 	 */
 	async getOverview(userId) {
-		// total responses
-		const totalRow = await this.db
-			.select({ count: sql`count(*)`.mapWith(Number) })
-			.from(responses)
-			.innerJoin(polls, eq(responses.pollId, polls.id))
-			.where(eq(polls.userId, userId));
+		const [totalRow, maxRow, modeRows, avgRow] = await Promise.all([
+			// total responses
+			this.db
+				.select({ count: sql`count(*)`.mapWith(Number) })
+				.from(responses)
+				.innerJoin(polls, eq(responses.pollId, polls.id))
+				.where(eq(polls.userId, userId)),
+			// total max capacity
+			this.db
+				.select({ total: sql`coalesce(sum(${polls.maxResponses}), 0)`.mapWith(Number) })
+				.from(polls)
+				.where(eq(polls.userId, userId)),
+			// participation by mode
+			this.db
+				.select({ mode: polls.mode, count: sql`count(*)`.mapWith(Number) })
+				.from(responses)
+				.innerJoin(polls, eq(responses.pollId, polls.id))
+				.where(eq(polls.userId, userId))
+				.groupBy(polls.mode),
+			// avg response time (computed in SQL)
+			this.db
+				.select({
+					avg: sql`coalesce(avg(EXTRACT(EPOCH FROM (${responses.submittedAt} - ${polls.createdAt}))), 0)`.mapWith(Number),
+				})
+				.from(responses)
+				.innerJoin(polls, eq(responses.pollId, polls.id))
+				.where(eq(polls.userId, userId)),
+		]);
+
 		const totalResponses = totalRow[0]?.count || 0;
-
-		// total max capacity
-		const maxRow = await this.db
-			.select({ total: sql`coalesce(sum(${polls.maxResponses}), 0)`.mapWith(Number) })
-			.from(polls)
-			.where(eq(polls.userId, userId));
 		const completionRate = this._completionRate(totalResponses, maxRow[0]?.total || 0);
-
-		// participation by mode
-		const modeRows = await this.db
-			.select({ mode: polls.mode, count: sql`count(*)`.mapWith(Number) })
-			.from(responses)
-			.innerJoin(polls, eq(responses.pollId, polls.id))
-			.where(eq(polls.userId, userId))
-			.groupBy(polls.mode);
 
 		const participationByMode = [
 			{ name: "Authenticated", value: 0 },
@@ -59,24 +68,9 @@ export class AnalyticsService {
 			else if (row.mode === "anonymous") participationByMode[1].value = row.count;
 		}
 
-		// avg response time
-		const timeRows = await this.db
-			.select({ createdAt: polls.createdAt, submittedAt: responses.submittedAt })
-			.from(responses)
-			.innerJoin(polls, eq(responses.pollId, polls.id))
-			.where(eq(polls.userId, userId));
-
-		let avgSeconds = 0;
-		if (timeRows.length > 0) {
-			const total = timeRows.reduce((acc, r) => {
-				return acc + Math.max(0, (r.submittedAt.getTime() - r.createdAt.getTime()) / 1000);
-			}, 0);
-			avgSeconds = total / timeRows.length;
-		}
-
 		return {
 			totalResponses,
-			avgResponseTime: this._formatDuration(avgSeconds),
+			avgResponseTime: this._formatDuration(avgRow[0]?.avg || 0),
 			completionRate,
 			participationByMode,
 		};
@@ -115,11 +109,19 @@ export class AnalyticsService {
 	 * Per-question breakdown: option counts and percentages.
 	 */
 	async getQuestionAnalytics(pollId) {
-		const questionRows = await this.db
-			.select()
-			.from(questions)
-			.where(eq(questions.pollId, pollId))
-			.orderBy(questions.sortOrder);
+		const [questionRows, optionCounts] = await Promise.all([
+			this.db
+				.select()
+				.from(questions)
+				.where(eq(questions.pollId, pollId))
+				.orderBy(questions.sortOrder),
+			this.db
+				.select({ optionId: answers.optionId, count: sql`count(*)`.mapWith(Number) })
+				.from(answers)
+				.innerJoin(responses, eq(answers.responseId, responses.id))
+				.where(eq(responses.pollId, pollId))
+				.groupBy(answers.optionId),
+		]);
 
 		const questionIds = questionRows.map((q) => q.id);
 		const optionRows = questionIds.length
@@ -130,13 +132,6 @@ export class AnalyticsService {
 					.orderBy(options.sortOrder)
 			: [];
 
-		const optionCounts = await this.db
-			.select({ optionId: answers.optionId, count: sql`count(*)`.mapWith(Number) })
-			.from(answers)
-			.innerJoin(responses, eq(answers.responseId, responses.id))
-			.where(eq(responses.pollId, pollId))
-			.groupBy(answers.optionId);
-
 		const countsByOptionId = new Map(optionCounts.map((r) => [r.optionId, r.count]));
 
 		const optionsByQuestion = new Map();
@@ -144,9 +139,6 @@ export class AnalyticsService {
 			const list = optionsByQuestion.get(opt.questionId) || [];
 			list.push(opt);
 			optionsByQuestion.set(opt.questionId, list);
-		}
-		for (const list of optionsByQuestion.values()) {
-			list.sort((a, b) => a.sortOrder - b.sortOrder);
 		}
 
 		const totalRow = await this.db
@@ -178,26 +170,27 @@ export class AnalyticsService {
 	 * Monthly trends: polls created + responses received per month.
 	 */
 	async getTrends(userId) {
-		const pollRows = await this.db
-			.select({
-				month: sql`to_char(date_trunc('month', ${polls.createdAt}), 'Mon')`.mapWith(String),
-				count: sql`count(*)`.mapWith(Number),
-			})
-			.from(polls)
-			.where(eq(polls.userId, userId))
-			.groupBy(sql`date_trunc('month', ${polls.createdAt})`)
-			.orderBy(sql`date_trunc('month', ${polls.createdAt})`);
-
-		const responseRows = await this.db
-			.select({
-				month: sql`to_char(date_trunc('month', ${responses.submittedAt}), 'Mon')`.mapWith(String),
-				count: sql`count(*)`.mapWith(Number),
-			})
-			.from(responses)
-			.innerJoin(polls, eq(responses.pollId, polls.id))
-			.where(eq(polls.userId, userId))
-			.groupBy(sql`date_trunc('month', ${responses.submittedAt})`)
-			.orderBy(sql`date_trunc('month', ${responses.submittedAt})`);
+		const [pollRows, responseRows] = await Promise.all([
+			this.db
+				.select({
+					month: sql`to_char(date_trunc('month', ${polls.createdAt}), 'Mon')`.mapWith(String),
+					count: sql`count(*)`.mapWith(Number),
+				})
+				.from(polls)
+				.where(eq(polls.userId, userId))
+				.groupBy(sql`date_trunc('month', ${polls.createdAt})`)
+				.orderBy(sql`date_trunc('month', ${polls.createdAt})`),
+			this.db
+				.select({
+					month: sql`to_char(date_trunc('month', ${responses.submittedAt}), 'Mon')`.mapWith(String),
+					count: sql`count(*)`.mapWith(Number),
+				})
+				.from(responses)
+				.innerJoin(polls, eq(responses.pollId, polls.id))
+				.where(eq(polls.userId, userId))
+				.groupBy(sql`date_trunc('month', ${responses.submittedAt})`)
+				.orderBy(sql`date_trunc('month', ${responses.submittedAt})`),
+		]);
 
 		const responseMap = new Map(responseRows.map((r) => [r.month, r.count]));
 
