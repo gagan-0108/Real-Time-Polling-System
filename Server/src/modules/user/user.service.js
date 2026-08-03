@@ -44,27 +44,23 @@ export class UserService {
             .limit(1);
         const plan = userRow[0]?.plan || "free";
         const email = (userRow[0]?.email || "").toLowerCase();
-
-        // Check if user is whitelisted for unlimited access
         const isUnlimited = config.unlimitedEmails.has(email);
 
-        const authUsedRow = await this.db
-            .select({ count: sql`count(*)`.mapWith(Number) })
-            .from(polls)
-            .where(
-                and(eq(polls.userId, userId), eq(polls.mode, "authenticated")),
-            );
-
-        const anonUsedRow = await this.db
-            .select({ count: sql`count(*)`.mapWith(Number) })
-            .from(polls)
-            .where(and(eq(polls.userId, userId), eq(polls.mode, "anonymous")));
-
-        const storedRow = await this.db
-            .select({ count: sql`count(*)`.mapWith(Number) })
-            .from(responses)
-            .innerJoin(polls, eq(responses.pollId, polls.id))
-            .where(eq(polls.userId, userId));
+        const [authUsedRow, anonUsedRow, storedRow] = await Promise.all([
+            this.db
+                .select({ count: sql`count(*)`.mapWith(Number) })
+                .from(polls)
+                .where(and(eq(polls.userId, userId), eq(polls.mode, "authenticated"))),
+            this.db
+                .select({ count: sql`count(*)`.mapWith(Number) })
+                .from(polls)
+                .where(and(eq(polls.userId, userId), eq(polls.mode, "anonymous"))),
+            this.db
+                .select({ count: sql`count(*)`.mapWith(Number) })
+                .from(responses)
+                .innerJoin(polls, eq(responses.pollId, polls.id))
+                .where(eq(polls.userId, userId)),
+        ]);
 
         const limits = config.planLimits;
 
