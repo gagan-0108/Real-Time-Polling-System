@@ -38,7 +38,7 @@ export class ResponseService {
 			throw new AppError("Poll has reached max responses", 400);
 		}
 
-		// ── duplicate check: IP for anonymous ──
+		// duplicate IP address check
 		const isAuth = normalized.mode === "authenticated";
 		if (!isAuth && ipAddress) {
 			const existing = await this.db
@@ -51,7 +51,7 @@ export class ResponseService {
 			}
 		}
 
-		// ── duplicate check: user for authenticated ──
+		// duplicate user check
 		if (isAuth && userId) {
 			const existing = await this.db
 				.select({ id: responses.id })
@@ -63,13 +63,13 @@ export class ResponseService {
 			}
 		}
 
-		// ── load questions + options ──
+		// load questions + options
 		const { questionRows, optionsByQuestion } = await this.pollService._getQuestionsWithOptions(pollId);
 		if (questionRows.length === 0) {
 			throw new AppError("Poll has no questions", 400);
 		}
 
-		// ── validate answers ──
+		// validate answers
 		const questionIdSet = new Set(questionRows.map((q) => q.id));
 		for (const qId of Object.keys(answersPayload)) {
 			if (!questionIdSet.has(qId)) {
@@ -156,7 +156,7 @@ export class ResponseService {
 			});
 		}
 
-		// ── load responses + answers ──
+		// load responses + answers
 		const responseRows = await this.db
 			.select()
 			.from(responses)
