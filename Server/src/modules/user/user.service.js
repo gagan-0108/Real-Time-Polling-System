@@ -42,9 +42,18 @@ export class UserService {
             .from(users)
             .where(eq(users.id, userId))
             .limit(1);
-        const plan = userRow[0]?.plan || "free";
+        let plan = userRow[0]?.plan || "free";
         const email = (userRow[0]?.email || "").toLowerCase();
         const isUnlimited = config.unlimitedEmails.has(email);
+
+        // Auto-upgrade unlimited emails to pro plan in DB
+        if (isUnlimited && plan !== "pro") {
+            plan = "pro";
+            await this.db
+                .update(users)
+                .set({ plan: "pro" })
+                .where(eq(users.id, userId));
+        }
 
         const [authUsedRow, anonUsedRow, storedRow] = await Promise.all([
             this.db

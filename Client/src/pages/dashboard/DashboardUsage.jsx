@@ -6,24 +6,37 @@ import { Gauge, ArrowUpRight, Infinity, Crown } from "lucide-react";
 
 function UsageBar({ label, used, limit, color = "bg-white" }) {
     const isUnlimited = limit === -1;
-    const pct = isUnlimited ? 5 : limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
+    const pct = isUnlimited ? 0 : limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
     const atLimit = !isUnlimited && limit > 0 && used >= limit;
 
     return (
         <div className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950">
             <div className="flex items-center justify-between mb-3">
                 <span className="text-zinc-400 text-xs font-medium">{label}</span>
-                <span className={`text-xs font-mono ${atLimit ? "text-red-400" : "text-white"}`}>
-                    {used} / {isUnlimited ? "∞" : limit}
-                </span>
+                {isUnlimited ? (
+                    <span className="text-emerald-400 text-xs font-mono flex items-center gap-1">
+                        <Infinity size={14} /> Unlimited
+                    </span>
+                ) : (
+                    <span className={`text-xs font-mono ${atLimit ? "text-red-400" : "text-white"}`}>
+                        {used} / {limit}
+                    </span>
+                )}
             </div>
             <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                    className={`h-full rounded-full transition-all duration-700 ease-out ${
-                        atLimit ? "bg-red-500" : color
-                    }`}
-                    style={{ width: `${pct}%` }}
-                />
+                {isUnlimited ? (
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500/40 to-emerald-500/10"
+                        style={{ width: "100%" }}
+                    />
+                ) : (
+                    <div
+                        className={`h-full rounded-full transition-all duration-700 ease-out ${
+                            atLimit ? "bg-red-500" : color
+                        }`}
+                        style={{ width: `${pct}%` }}
+                    />
+                )}
             </div>
             {atLimit && (
                 <p className="text-red-400/80 text-[10px] mt-2 font-medium">Limit reached — upgrade for more</p>
