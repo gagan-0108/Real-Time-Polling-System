@@ -5,7 +5,7 @@
 //  automatically injects the Clerk session token.
 // ─────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001/api";
 
 /** Generic fetch wrapper with auth token */
 async function request(path, options = {}) {

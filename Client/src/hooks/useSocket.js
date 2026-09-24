@@ -10,7 +10,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 //     inside the useEffect in useSocket()
 // ─────────────────────────────────────────────────────────
 
-const USE_SOCKET = false;
+const USE_SOCKET = true;
 
 
 /**

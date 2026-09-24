@@ -76,7 +76,7 @@ export class ResponseService {
 				throw new AppError("Answer contains invalid question", 400);
 			}
 		}
-w
+
 		const answerRecords = [];
 		for (const q of questionRows) {
 			const answerIndex = answersPayload[q.id];
