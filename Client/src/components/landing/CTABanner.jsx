@@ -43,67 +43,74 @@ export function CTABanner({ onCreatePoll }) {
                     <div className="w-96 h-96 bg-white opacity-[0.03] rounded-full blur-3xl" />
                 </div>
 
-                {/* default state */}
-                <div
-                    className={`transition-all duration-300 ${hovered ? "opacity-0 scale-95 absolute inset-0 flex flex-col items-center justify-center pointer-events-none" : ""}`}
-                >
-                    <h2
-                        className="text-5xl md:text-6xl font-black tracking-tighter text-white mb-6 relative z-10"
-                        style={{ fontFamily: "'DM Serif Display', serif" }}
+                {/* fixed-height wrapper to prevent layout shift */}
+                <div className="relative z-10" style={{ minHeight: "280px" }}>
+                    {/* default state */}
+                    <div
+                        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${
+                            hovered
+                                ? "opacity-0 scale-95 pointer-events-none"
+                                : "opacity-100 scale-100"
+                        }`}
                     >
-                        Ready to start?
-                    </h2>
-                    <p className="text-zinc-500 text-lg mb-10 relative z-10">
-                        Try for free. Create. Share. Always real-time.
-                    </p>
-                    <button
-                        onClick={onCreatePoll}
-                        className="relative z-10 inline-flex items-center gap-2 px-8 py-4 bg-white
-                       text-black font-bold text-sm rounded-xl hover:bg-zinc-200
-                       transition-all duration-150 hover:scale-[1.02] active:scale-95"
-                    >
-                        Create your first poll →
-                    </button>
-                </div>
-
-                {/* hovered state — mini analytics teaser */}
-                <div
-                    className={`relative z-10 transition-all duration-300 ${
-                        hovered
-                            ? "opacity-100 scale-100"
-                            : "opacity-0 scale-95 pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
-                    }`}
-                >
-                    <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-widest mb-6">
-                        What you'll see after submitting
-                    </p>
-                    <div className="max-w-xs mx-auto text-left space-y-3 mb-8">
-                        {[
-                            { label: "Total responses", val: "248" },
-                            { label: "Completion rate", val: "91%" },
-                            { label: "Avg. time", val: "1m 24s" },
-                            { label: "Anonymous", val: "63 / 248" },
-                        ].map(({ label, val }) => (
-                            <div
-                                key={label}
-                                className="flex items-center justify-between"
-                            >
-                                <span className="text-zinc-500 text-xs">
-                                    {label}
-                                </span>
-                                <span className="text-white text-xs font-mono font-bold">
-                                    {val}
-                                </span>
-                            </div>
-                        ))}
+                        <h2
+                            className="text-5xl md:text-6xl font-black tracking-tighter text-white mb-6"
+                            style={{ fontFamily: "'DM Serif Display', serif" }}
+                        >
+                            Ready to start?
+                        </h2>
+                        <p className="text-zinc-500 text-lg mb-10">
+                            Try for free. Create. Share. Always real-time.
+                        </p>
+                        <button
+                            onClick={onCreatePoll}
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-white
+                           text-black font-bold text-sm rounded-xl hover:bg-zinc-200
+                           transition-all duration-150 hover:scale-[1.02] active:scale-95"
+                        >
+                            Create your first poll →
+                        </button>
                     </div>
-                    <button
-                        onClick={onCreatePoll}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-black
-                       font-bold text-sm rounded-xl hover:bg-zinc-200 transition-all duration-150"
+
+                    {/* hovered state — mini analytics teaser */}
+                    <div
+                        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${
+                            hovered
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-105 pointer-events-none"
+                        }`}
                     >
-                        Create your first poll →
-                    </button>
+                        <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-widest mb-6">
+                            What you'll see after submitting
+                        </p>
+                        <div className="max-w-xs w-full text-left space-y-3 mb-8">
+                            {[
+                                { label: "Total responses", val: "248" },
+                                { label: "Completion rate", val: "91%" },
+                                { label: "Avg. time", val: "1m 24s" },
+                                { label: "Anonymous", val: "63 / 248" },
+                            ].map(({ label, val }) => (
+                                <div
+                                    key={label}
+                                    className="flex items-center justify-between"
+                                >
+                                    <span className="text-zinc-500 text-xs">
+                                        {label}
+                                    </span>
+                                    <span className="text-white text-xs font-mono font-bold">
+                                        {val}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            onClick={onCreatePoll}
+                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-black
+                           font-bold text-sm rounded-xl hover:bg-zinc-200 transition-all duration-150"
+                        >
+                            Create your first poll →
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
