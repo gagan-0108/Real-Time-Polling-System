@@ -177,7 +177,11 @@ export class PollService {
 			const usedRow = await this.db
 				.select({ count: sql`count(*)`.mapWith(Number) })
 				.from(polls)
-				.where(and(eq(polls.userId, userId), eq(polls.mode, modeCol)));
+				.where(and(
+					eq(polls.userId, userId),
+					eq(polls.mode, modeCol),
+					eq(polls.status, "active"),
+				));
 			const used = usedRow[0]?.count || 0;
 
 			if (used >= limit) {

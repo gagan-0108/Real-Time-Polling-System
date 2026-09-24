@@ -12,7 +12,25 @@ export default function CreatePoll() {
     const [publishError, setPublishError] = useState(null);
     const [createdPollId, setCreatedPollId] = useState(null);
     const [linkCopied, setLinkCopied] = useState(false);
-    const [step, setStep] = useState(0); // 0=details, 1=questions, 2=preview, 3=success
+
+    // ── localStorage draft key ──
+    const DRAFT_KEY = "ionpoll_create_draft";
+
+    // Load saved draft from localStorage (runs once on mount)
+    const loadDraft = () => {
+        try {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                return parsed;
+            }
+        } catch { /* ignore corrupt data */ }
+        return null;
+    };
+
+    const savedDraft = loadDraft();
+
+    const [step, setStep] = useState(savedDraft?.step ?? 0); // 0=details, 1=questions, 2=preview, 3=success
 
     // Check poll limits on mount
     useEffect(() => {
@@ -31,7 +49,8 @@ export default function CreatePoll() {
             }
         }).catch(() => {});
     }, [ready]);
-    const [poll, setPoll] = useState({
+
+    const defaultPoll = {
         title: "",
         description: "",
         mode: "authenticated",
@@ -39,7 +58,21 @@ export default function CreatePoll() {
         questions: [
             { id: crypto.randomUUID(), text: "", options: ["", ""], mandatory: true },
         ],
-    });
+    };
+
+    const [poll, setPoll] = useState(savedDraft?.poll ?? defaultPoll);
+
+    // ── Persist draft to localStorage on changes (skip if on success step) ──
+    useEffect(() => {
+        if (step === 3) {
+            // Poll was published — clear the draft
+            localStorage.removeItem(DRAFT_KEY);
+            return;
+        }
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({ poll, step }));
+        } catch { /* localStorage full or unavailable */ }
+    }, [poll, step]);
 
     const addQuestion = () => {
         setPoll((p) => ({

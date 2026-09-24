@@ -54,6 +54,9 @@ export class AuthService {
 		await this.db
 			.insert(users)
 			.values({ id: userId, email, name })
-			.onConflictDoNothing({ target: users.id });
+			.onConflictDoUpdate({
+				target: users.id,
+				set: { email, name },
+			});
 	}
 }

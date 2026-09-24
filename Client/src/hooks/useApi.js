@@ -38,11 +38,15 @@ async function request(path, token, options = {}) {
 }
 
 /**
- * createApiClient — returns an API client bound to a specific token.
- * Usage: const api = createApiClient(token);
+ * createApiClient — returns an API client that fetches a fresh token per call.
+ * Accepts a getTokenFn that returns a Promise<string> (e.g. Clerk's getToken).
+ * This prevents stale JWT errors when the user sits on a page for a while.
  */
-export function createApiClient(token) {
-	const r = (path, opts) => request(path, token, opts);
+export function createApiClient(getTokenFn) {
+	const r = async (path, opts) => {
+		const token = typeof getTokenFn === "function" ? await getTokenFn() : getTokenFn;
+		return request(path, token, opts);
+	};
 
 	return {
 		polls: {
@@ -74,7 +78,9 @@ export function createApiClient(token) {
 
 /**
  * useApi — React hook that provides an authenticated API client.
- * Returns { api, loading, error }.
+ * The client fetches a fresh Clerk token on every request, so the
+ * JWT is never stale even if the user sits on the page for a while.
+ * Returns { api, ready }.
  */
 export function useApi() {
 	const { getToken, isLoaded } = useAuth();
@@ -82,10 +88,8 @@ export function useApi() {
 
 	useEffect(() => {
 		if (!isLoaded) return;
-
-		getToken().then((token) => {
-			setApi(createApiClient(token));
-		});
+		// Pass the getToken function itself — tokens are fetched per-call
+		setApi(createApiClient(getToken));
 	}, [isLoaded, getToken]);
 
 	return { api, ready: !!api };

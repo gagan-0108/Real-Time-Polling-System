@@ -50,11 +50,11 @@ export class UserService {
             this.db
                 .select({ count: sql`count(*)`.mapWith(Number) })
                 .from(polls)
-                .where(and(eq(polls.userId, userId), eq(polls.mode, "authenticated"))),
+                .where(and(eq(polls.userId, userId), eq(polls.mode, "authenticated"), eq(polls.status, "active"))),
             this.db
                 .select({ count: sql`count(*)`.mapWith(Number) })
                 .from(polls)
-                .where(and(eq(polls.userId, userId), eq(polls.mode, "anonymous"))),
+                .where(and(eq(polls.userId, userId), eq(polls.mode, "anonymous"), eq(polls.status, "active"))),
             this.db
                 .select({ count: sql`count(*)`.mapWith(Number) })
                 .from(responses)
